@@ -1,7 +1,16 @@
 // SW:FAIR — SINWOL × SOFTWARE  (React + htm, Firebase Firestore)
-import { firebaseConfig, ADMIN_EMAILS, SITE } from './firebase-config.js';
-
 const root = document.getElementById('root');
+
+// 설정 파일을 불러오다 실패하면 '로딩 중'에서 멈추지 않고 원인을 화면에 보여 줍니다.
+let CFG;
+try {
+  CFG = await import('./firebase-config.js');
+} catch (e) {
+  console.error(e);
+  root.innerHTML = '<div class="boot" style="text-align:center;line-height:1.8;padding:20px">firebase-config.js 파일에 오류가 있어요.<br>Firebase 콘솔의 예시 코드 중 <b>firebaseConfig 값만</b> 넣었는지 확인해 주세요.</div>';
+  throw e;
+}
+const { firebaseConfig, ADMIN_EMAILS, SITE } = CFG;
 if (!window.React || !window.ReactDOM || !window.htm) {
   root.innerHTML = '<div class="boot">화면을 불러오지 못했어요. 새로고침해 주세요.</div>';
   throw new Error('React/htm not loaded');

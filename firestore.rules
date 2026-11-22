@@ -10,7 +10,7 @@ service cloud.firestore {
     function isTeacher() {
       return request.auth != null
         && request.auth.token.email_verified == true
-        && request.auth.token.email in ['teacher@example.com'];
+        && request.auth.token.email in ['parkcy0815@gmail.com'];
     }
 
     function settingsPath() { return /databases/$(database)/documents/settings/site; }
