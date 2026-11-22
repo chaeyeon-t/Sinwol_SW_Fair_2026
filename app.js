@@ -251,10 +251,10 @@ function Gate({ config, onEnter, toast }) {
   return html`<${Stage} className="gate">
     <div class="gate-top"><span class="hud"><span class="dot"></span>2026 Sinwol SW Exhibition</span><span class="hud">Player Login</span></div>
     <div class="gate-mid">
-      <div class="hud">Welcome to the digital playground</div>
+      <div class="hud">Welcome to the Software Fair</div>
       <h1 class="brand-title" style=${{ marginTop: 16 }}>SW<span class="col">:</span>FAIR</h1>
       <div class="brand-sub">SINWOL × SOFTWARE</div>
-      <p class="gate-copy">신월중학교 학생들이 한 달 동안 만든 엔트리 작품 전시 사이트.<br/>학생의 정보를 입력하고 입장하세요.</p>
+      <p class="gate-copy">SW:FAIR는 신월(Sinwol)의 SW와 소프트웨어(Software)의 SW를 결합한 이름으로 학생들이 제작한 엔트리 프로그램을 전시한 사이트입니다.<br/>학생의 정보를 입력하고 입장하세요.</p>
       <form class="entry" onSubmit=${submit} autoComplete="off">
         <div class="entry-head"><b>STUDENT LOGIN</b></div>
         <div class="g3">
@@ -281,7 +281,7 @@ function Home({ data, go, onOpen }) {
           <h1 class="brand-title">SW<span class="col">:</span>FAIR</h1>
           <span class="brand-sub">SINWOL × SOFTWARE</span>
           <div class="slogan">상상을 코드로,<br/><em>코드를 플레이로.</em></div>
-          <p class="lead">한 달 동안 엔트리로 직접 설계하고 코딩한 신월중학교 학생들의 게임, 애니메이션, 아트 작품이 공개됩니다. 플레이해 보고, 최고의 작품에 투표하세요.</p>
+          <p class="lead">한 달 동안 엔트리로 직접 설계하고 코딩한 신월중학교 학생들의 게임, 애니메이션 작품이 공개됩니다. 플레이해 보고, 최고의 작품에 투표하세요.</p>
           <div class="cta">
             <button class="neon" type="button" onClick=${() => go('explore')}>작품 둘러보기 <span class="arr">→</span></button>
             <button class="ghost" type="button" onClick=${() => go('vote')}>투표하러 가기</button>
