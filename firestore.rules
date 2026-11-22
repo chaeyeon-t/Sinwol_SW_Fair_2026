@@ -1,0 +1,95 @@
+rules_version = '2';
+
+// SW:FAIR Firestore 보안 규칙
+// ⚠️ 아래 isTeacher()의 이메일을 선생님 구글 계정으로 바꾼 뒤 배포하세요.
+//    (firebase-config.js의 ADMIN_EMAILS와 같아야 합니다)
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isTeacher() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in ['teacher@example.com'];
+    }
+
+    function settingsPath() { return /databases/$(database)/documents/settings/site; }
+    function uploadOpen() { return !exists(settingsPath()) || get(settingsPath()).data.uploadOpen == true; }
+    function votingOpen() { return !exists(settingsPath()) || get(settingsPath()).data.votingOpen == true; }
+
+    // 학년-반-번호 문서 ID와 내용이 일치하는지
+    function validStudent(d, key) {
+      return d.grade is int && d.ban is int && d.num is int
+        && d.grade >= 1 && d.grade <= 3
+        && d.ban >= 1 && d.ban <= 20
+        && d.num >= 1 && d.num <= 50
+        && key == string(d.grade) + '-' + string(d.ban) + '-' + string(d.num)
+        && d.name is string && d.name.size() >= 2 && d.name.size() <= 10;
+    }
+
+    function validWork(d, key) {
+      return validStudent(d, key)
+        && d.keys().hasOnly(['grade', 'ban', 'num', 'name', 'category', 'title', 'purpose', 'usage', 'link', 'thumb', 'approved', 'createdAt', 'updatedAt'])
+        && d.category in ['GAME', 'ANIMATION', 'ART', 'EDUCATION', 'ETC']
+        && d.title is string && d.title.size() >= 1 && d.title.size() <= 40
+        && d.purpose is string && d.purpose.size() >= 1 && d.purpose.size() <= 300
+        && d.usage is string && d.usage.size() >= 1 && d.usage.size() <= 500
+        && d.link is string && d.link.size() <= 300 && d.link.matches('https://(www[.])?playentry[.]org/.+')
+        && d.thumb is string && d.thumb.size() <= 60000 && d.thumb.matches('data:image/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+')
+        && d.approved == false
+        && d.updatedAt == request.time;
+    }
+
+    // ---------- 작품 ----------
+    match /works/{key} {
+      allow get: if true;
+      // 전시 승인된 작품만 목록으로 조회 가능 (관리자는 전체)
+      allow list: if resource.data.approved == true || isTeacher();
+      allow create: if isTeacher()
+        || (uploadOpen() && validWork(request.resource.data, key) && request.resource.data.createdAt == request.time);
+      // 학생이 다시 제출하면 승인이 꺼짐. 승인/숨김은 관리자만.
+      allow update: if isTeacher()
+        || (uploadOpen() && validWork(request.resource.data, key) && request.resource.data.createdAt == resource.data.createdAt);
+      allow delete: if isTeacher();
+    }
+
+    // ---------- 투표 (학년-반-번호당 1회, 수정 불가) ----------
+    match /votes/{key} {
+      allow get: if true;
+      allow list: if isTeacher();
+      allow create: if votingOpen()
+        && validStudent(request.resource.data, key)
+        && request.resource.data.keys().hasOnly(['grade', 'ban', 'num', 'name', 'picks', 'createdAt'])
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.picks is list
+        && request.resource.data.picks.size() == 2
+        && request.resource.data.picks[0] is string
+        && request.resource.data.picks[1] is string
+        && request.resource.data.picks[0] != request.resource.data.picks[1]
+        && get(/databases/$(database)/documents/works/$(request.resource.data.picks[0])).data.approved == true
+        && get(/databases/$(database)/documents/works/$(request.resource.data.picks[1])).data.approved == true
+        && getAfter(/databases/$(database)/documents/stats/public).data.lastVote == key;
+      allow update: if false;
+      allow delete: if isTeacher();
+    }
+
+    // ---------- 전체 투표 수 (투표와 함께 1씩만 증가) ----------
+    match /stats/public {
+      allow get: if true;
+      allow create, update: if isTeacher() || (
+        request.resource.data.keys().hasOnly(['votes', 'lastVote'])
+        && request.resource.data.votes == (resource == null ? 0 : resource.data.votes) + 1
+        && request.resource.data.lastVote is string
+        && !exists(/databases/$(database)/documents/votes/$(request.resource.data.lastVote))
+        && existsAfter(/databases/$(database)/documents/votes/$(request.resource.data.lastVote))
+      );
+      allow delete: if isTeacher();
+    }
+
+    // ---------- 마감 설정 ----------
+    match /settings/site {
+      allow get: if true;
+      allow write: if isTeacher();
+    }
+  }
+}
