@@ -254,9 +254,9 @@ function Gate({ config, onEnter, toast }) {
       <div class="hud">Welcome to the digital playground</div>
       <h1 class="brand-title" style=${{ marginTop: 16 }}>SW<span class="col">:</span>FAIR</h1>
       <div class="brand-sub">SINWOL × SOFTWARE</div>
-      <p class="gate-copy">신월중학교 학생들이 한 달 동안 엔트리로 만든 작품의 세계.<br/>플레이어 정보를 입력하고 입장하세요.</p>
+      <p class="gate-copy">신월중학교 학생들이 한 달 동안 만든 엔트리 작품 전시 사이트.<br/>학생의 정보를 입력하고 입장하세요.</p>
       <form class="entry" onSubmit=${submit} autoComplete="off">
-        <div class="entry-head"><b>PLAYER ENTRY</b><span class="hud" style=${{ fontSize: 10.5 }}>Step 01 / 01</span></div>
+        <div class="entry-head"><b>STUDENT LOGIN</b></div>
         <div class="g3">
           <label class="fld"><span><span class="en">GRADE · </span>학년</span><select class="dark-in" value=${f.grade} onChange=${set('grade')}>${opts(config.grades, '학년')}</select></label>
           <label class="fld"><span><span class="en">CLASS · </span>반</span><select class="dark-in" value=${f.ban} onChange=${set('ban')}>${opts(range(config.classCount), '반')}</select></label>
@@ -264,7 +264,6 @@ function Gate({ config, onEnter, toast }) {
         </div>
         <label class="fld"><span><span class="en">NAME · </span>이름</span><input class="dark-in" type="text" maxLength="10" placeholder="이름을 입력하세요" value=${f.name} onChange=${set('name')} /></label>
         <button class="neon" type="submit">ENTER THE FAIR <span class="arr">→</span></button>
-        <small>입력한 정보는 작품 올리기와 투표에만 사용돼요.</small>
       </form>
     </div>
   <//>`;
